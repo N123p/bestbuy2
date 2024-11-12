@@ -1,3 +1,6 @@
+import products
+
+
 class Product:
     """Represents a product in a store with a name, price, and quantity."""
 
@@ -85,10 +88,57 @@ class Product:
         self.set_quantity(self.quantity - quantity)
         return total_price
 
-# Testing code (commented out to avoid unused variable warning)
-# def main():
-#     bose = Product("Bose QuietComfort Earbuds", price=250, quantity=500)
-#     # mac = Product("MacBook Air M2", price=1450, quantity=100)  # Unused variable
-#     bose.set_quantity(1000)
+class NonStockedProduct(Product):
+    """Represents a non-stocked product with no quantity tracking (e.g., software licenses)."""
 
-# main()
+    def __init__(self, name: str, price: float):
+        """Initializes a NonStockedProduct with zero quantity."""
+        super().__init__(name, price, quantity=0)
+
+    def set_quantity(self, quantity: int):
+        """Prevents change in quantity for non-stocked products."""
+        raise Exception("Quantity cannot be set for non-stocked products.")
+
+    def show(self) -> str:
+        """Returns a string representing  non-stocked product details """
+        return f"{self.name}, Price: ${self.price}, Non-stocked product"
+class LimitedProduct(Product):
+    """Represents a product that can be purchased a limited number of times per order (e.g., shipping fees)."""
+
+    def __init__(self, name: str, price: float, quantity: int, maximum: int):
+        """
+        Initializes a LimitedProduct with a maximum purchase limit per order.
+
+        Args:
+            maximum (int): The maximum quantity allowed per purchase.
+        """
+        super().__init__(name, price, quantity)
+        self.maximum = maximum
+
+    def buy(self, quantity: int) -> float:
+        """Ensures that the purchase quantity does not exceed the set maximum."""
+        if quantity > self.maximum:
+            raise Exception(f"Cannot buy more than {self.maximum} of {self.name} in a single order.")
+        return super().buy(quantity)
+    def show(self) -> str:
+        """Returns a stirng by representing limited product details."""
+        return f"{self.name}, Price: ${self.price}, Quantity: {self.quantity}, Max per order{self.maximum}"
+
+
+
+
+
+
+# Testing code (commented out to avoid unused variable warning)
+# Setup initial stock of inventory
+import store
+
+# setup initial stock of inventory
+product_list = [ products.Product("MacBook Air M2", price=1450, quantity=100),
+                 products.Product("Bose QuietComfort Earbuds", price=250, quantity=500),
+                 products.Product("Google Pixel 7", price=500, quantity=250),
+                 products.NonStockedProduct("Windows License", price=125),
+                 products.LimitedProduct("Shipping", price=10, quantity=250, maximum=1)
+               ]
+best_buy = store.Store(product_list)
+
