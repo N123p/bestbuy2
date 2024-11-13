@@ -1,12 +1,27 @@
-from products import Product
+from products import Product, NonStockedProduct, LimitedProduct
 from store import Store
+from promotions import PercentDiscount, SecondHalfPrice, ThirdOneFree
 
+# Setup initial stock of inventory with promotions
 product_list = [
     Product("MacBook Air M2", price=1450, quantity=100),
     Product("Bose QuietComfort Earbuds", price=250, quantity=500),
-    Product("Google Pixel 7", price=500, quantity=250)
+    Product("Google Pixel 7", price=500, quantity=250),
+    NonStockedProduct("Windows License", price=125),
+    LimitedProduct("Shipping", price=10, quantity=250, maximum=1)
 ]
 
+# Create promotion instances
+second_half_price = SecondHalfPrice("Second Half price!")
+third_one_free = ThirdOneFree("Third One Free!")
+thirty_percent_off = PercentDiscount("30% off", percent=30)
+
+# Add promotions to selected products
+product_list[0].set_promotion(second_half_price)  # MacBook Air M2
+product_list[1].set_promotion(third_one_free)  # Bose QuietComfort Earbuds
+product_list[3].set_promotion(thirty_percent_off)  # Windows License
+
+# Create a store with the products
 best_buy = Store(product_list)
 
 
@@ -26,11 +41,7 @@ def show_total_amount(store: Store):
 
 
 def make_order(store: Store):
-    """Handles creating an order by prompting user input for product and quantity.
-
-    Raises:
-        ValueError: If input quantity is invalid.
-    """
+    """Handles creating an order by prompting user input for product and quantity."""
     shopping_list = []
     products = store.get_all_products()
 
@@ -54,6 +65,12 @@ def make_order(store: Store):
                 break
 
             quantity = int(quantity_input)
+
+
+            if isinstance(product, LimitedProduct) and quantity > product.maximum:
+                print(f"Error while making order! Only {product.maximum} is allowed from this product!")
+                return
+
             shopping_list.append((product, quantity))
             print("Product added to list!")
 
@@ -64,11 +81,19 @@ def make_order(store: Store):
 
     try:
         total_cost = store.order(shopping_list)
-        print(f"********\nOrder made! Total payment: ${total_cost}\n********")
+        print(f"********\nOrder made! Total payment: ${total_cost:.2f}\n********")
     except ValueError as error:
         print(f"Error in processing order: {error}")
-    except LookupError as error:  # Handling stock-related issues, if applicable
+    except LookupError as error:
         print(f"Insufficient stock for one of the products: {error}")
+    except Exception as error:
+        print(f"Unexpected error: {error}")
+
+
+    return
+
+
+
 
 
 def start(store: Store):
@@ -97,7 +122,7 @@ def start(store: Store):
             print("Invalid choice. Please enter a number between 1 and 4.")
 
 
-# Main function to start the store interaction
+
 def main():
     """Main function to initialize the store and start the user interface."""
     start(best_buy)
