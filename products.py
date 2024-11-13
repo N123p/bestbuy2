@@ -129,7 +129,7 @@ class LimitedProduct(Product):
 
 
 
-# Testing code (commented out to avoid unused variable warning)
+# Testing code 
 # Setup initial stock of inventory
 import store
 
