@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 class Promotion(ABC):
-    """Represents a product in a store with a name, price, and quantity, and optional promotion."""
+    """Abstract base class for promotions."""
 
     def __init__(self, name: str):
         self.name = name
@@ -13,7 +13,7 @@ class Promotion(ABC):
 
 
 class PercentDiscount(Promotion):
-    """Applies percentage discount."""
+    """Applies a percentage discount."""
 
     def __init__(self, name: str, percent: float):
         super().__init__(name)
@@ -25,9 +25,7 @@ class PercentDiscount(Promotion):
 
 
 class SecondHalfPrice(Promotion):
-    """Applies promotion for second item at half price."""
-    def __init__(self, name: str):
-        super().__init__(name)
+    """Applies a promotion where the second item is half price."""
 
     def apply_promotion(self, product, quantity) -> float:
         full_price_count = quantity // 2 + quantity % 2
@@ -36,9 +34,7 @@ class SecondHalfPrice(Promotion):
 
 
 class ThirdOneFree(Promotion):
-    """Applies for third item free."""
-    def __init__(self, name: str):
-        super().__init__(name)
+    """Applies a promotion where every third item is free."""
 
     def apply_promotion(self, product, quantity) -> float:
         paid_items = (quantity // 3) * 2 + (quantity % 3)

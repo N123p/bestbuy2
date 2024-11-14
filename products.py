@@ -1,109 +1,49 @@
-from typing import Optional
-import promotions
-
-
 class Product:
-    """Represents a product in a store with a name, price, and quantity."""
-
-    def __init__(self, name: str, price: float, quantity: int):
-        """
-        Initializes a Product instance.
-
-        Args:
-           name (str): The name of the product.
-           price (float): The price per unit of the product.
-           quantity (int): The quantity of the product in stock.
-
-        Raises:
-            ValueError: If name is empty or if price/quantity are negative.
-        """
-        if not name or price < 0 or quantity < 0:
-            raise ValueError("Invalid input: name cannot be empty, and price/quantity must be non-negative.")
+    def __init__(self, name: str, price: float, quantity: int = 0):
+        """Initialize a Product with name, price, and initial quantity."""
         self.name = name
         self.price = price
         self.quantity = quantity
-        self.active = True
-        self.promotion = None
+        self.promotion = None  # Promotion starts as None
 
-    def set_promotion(self, promotion: Optional[promotions.Promotion]):
+    def set_promotion(self, promotion):
         """Sets a promotion for the product."""
         self.promotion = promotion
 
     def get_quantity(self) -> int:
-        """Returns the current quantity of the product in stock."""
+        """Returns the current quantity of the product."""
         return self.quantity
 
-    def set_quantity(self, quantity: int):
-        """
-        Sets the quantity of the product. Deactivates the product if quantity is 0.
-
-        Args:
-            quantity (int): The new quantity to set.
-
-        Raises:
-            ValueError: If the quantity is negative.
-        """
-        if quantity < 0:
-            raise ValueError("Quantity cannot be negative.")
-        self.quantity = quantity
-        if self.quantity == 0:
-            self.deactivate()
-
     def is_active(self) -> bool:
-        """Returns True if the product is active, otherwise False."""
-        return self.active
-
-    def activate(self):
-        """Activates the product, making it available for purchase."""
-        self.active = True
-
-    def deactivate(self):
-        """Deactivates the product, making it unavailable for purchase."""
-        self.active = False
-
-    def show(self) -> str:
-        """Returns a string representing the product details, including promotion if present."""
-        promotion_info = f", Promotion: {self.promotion.name}" if self.promotion else ", Promotion: None"
-        return f"{self.name}, Price: ${self.price}, Quantity: {self.quantity}{promotion_info}"
+        """Checks if the product is active (has quantity > 0)."""
+        return self.quantity > 0
 
     def buy(self, quantity: int) -> float:
-        """
-        Buys a given quantity of the product and returns the total price.
-
-        Args:
-            quantity (int): The quantity to purchase.
-
-        Returns:
-            float: The total price for the purchased quantity.
-
-        Raises:
-            ValueError: If quantity is non-positive.
-            Exception: If the product is inactive or if requested quantity is unavailable.
-        """
-        if quantity <= 0:
-            raise ValueError("Quantity to buy must be positive.")
-        if not self.is_active():
-            raise Exception("Product is inactive and cannot be purchased.")
+        """Reduces the product quantity and returns the cost for given quantity."""
         if quantity > self.quantity:
-            raise Exception("Insufficient quantity in stock.")
+            raise ValueError("Not enough stock")
+        self.quantity -= quantity
+        return self.price * quantity
 
-        total_price = quantity * self.price
-        if self.promotion:
-            total_price = self.promotion.apply_promotion(self, quantity)
-        self.set_quantity(self.quantity - quantity)
-        return total_price
+    def show(self) -> str:
+        """Displays product information, including promotion if set."""
+        promotion_text = f"Promotion: {self.promotion.name}!" if self.promotion else "Promotion: None"
+        return f"{self.name}, Price: ${self.price}, Quantity: {self.quantity}, {promotion_text}"
 
 
 class NonStockedProduct(Product):
-    """Represents a non-stocked product with no quantity tracking (e.g., software licenses)."""
-
     def __init__(self, name: str, price: float):
-        """Initializes a NonStockedProduct with zero quantity."""
-        super().__init__(name, price, quantity=0)
+        """Initialize a NonStockedProduct with unlimited quantity."""
+        super().__init__(name, price)
+        self.quantity = float('inf')  # Represent unlimited stock
 
-    def set_quantity(self, quantity: int):
-        """Prevents change in quantity for non-stocked products."""
-        raise Exception("Quantity cannot be set for non-stocked products.")
+    def get_quantity(self) -> str:
+        """Overrides quantity display for unlimited products."""
+        return "Unlimited"
+
+    def buy(self, quantity: int) -> float:
+        """Overrides buy to allow unlimited purchase without reducing stock."""
+        return self.price * quantity
 
     def show(self) -> str:
         """Displays information specific to NonStockedProduct."""
@@ -111,47 +51,19 @@ class NonStockedProduct(Product):
         return f"{self.name}, Price: ${self.price}, Quantity: Unlimited, {promotion_text}"
 
 
-    def buy(self, quantity: int) -> float:
-        """
-        Calculates the price for a purchase of a non-stocked product.
-        Does not check quantity limits, since it is unlimited.
-        """
-        if quantity <= 0:
-            raise ValueError("Quantity to buy must be positive.")
-        if self.promotion:
-            return self.promotion.apply_promotion(self, quantity)
-        else:
-            return quantity * self.price  # Calculates total based on price alone, without quantity restriction.
-
-
-
 class LimitedProduct(Product):
-    """Represents the product purchased a limited number of times per order."""
     def __init__(self, name: str, price: float, quantity: int, maximum: int):
-        """
-        Initializes a LimitedProduct with a maximum purchase limit per order.
-
-        Args:
-            maximum (int): The maximum quantity allowed per purchase.
-        """
-
+        """Initialize a LimitedProduct with a max purchase limit."""
         super().__init__(name, price, quantity)
         self.maximum = maximum
 
     def buy(self, quantity: int) -> float:
-        """Ensures that the purchase quantity does not exceed the set maximum."""
+        """Ensures quantity does not exceed the maximum limit."""
         if quantity > self.maximum:
-            raise Exception(f"Cannot buy more than {self.maximum} of {self.name} in a single order.")
+            raise ValueError(f"Only {self.maximum} of this product can be purchased at a time.")
         return super().buy(quantity)
 
     def show(self) -> str:
         """Displays information specific to LimitedProduct."""
         promotion_text = f"Promotion: {self.promotion.name}!" if self.promotion else "Promotion: None"
         return f"{self.name}, Price: ${self.price}, Limited to {self.maximum} per order!, {promotion_text}"
-
-
-
-
-
-
-
