@@ -1,6 +1,6 @@
 class Product:
     def __init__(self, name: str, price: float, quantity: int = 0):
-        """Initialize a Product with name, price, and initial quantity."""
+        """Initialize a Product with a name, price, and initial quantity."""
         self.name = name
         self.price = price
         self.quantity = quantity
@@ -19,7 +19,7 @@ class Product:
         return self.quantity > 0
 
     def buy(self, quantity: int) -> float:
-        """Reduces the product quantity and returns the cost for given quantity."""
+        """Reduces the product quantity and returns the cost for the given quantity."""
         if quantity > self.quantity:
             raise ValueError("Not enough stock")
         self.quantity -= quantity
@@ -35,7 +35,7 @@ class NonStockedProduct(Product):
     def __init__(self, name: str, price: float):
         """Initialize a NonStockedProduct with unlimited quantity."""
         super().__init__(name, price)
-        self.quantity = float('inf')  # Represent unlimited stock
+        self.quantity = float('inf')  # Represent unlimited stock as infinity
 
     def get_quantity(self) -> str:
         """Overrides quantity display for unlimited products."""
@@ -53,14 +53,15 @@ class NonStockedProduct(Product):
 
 class LimitedProduct(Product):
     def __init__(self, name: str, price: float, quantity: int, maximum: int):
-        """Initialize a LimitedProduct with a max purchase limit."""
+        """Initialize a LimitedProduct with a maximum purchase limit per order."""
         super().__init__(name, price, quantity)
         self.maximum = maximum
 
     def buy(self, quantity: int) -> float:
-        """Ensures quantity does not exceed the maximum limit."""
+        """Ensures the purchase quantity does not exceed the maximum allowed."""
         if quantity > self.maximum:
             raise ValueError(f"Only {self.maximum} of this product can be purchased at a time.")
+        # Call the parent `buy()` method to handle stock reduction and pricing
         return super().buy(quantity)
 
     def show(self) -> str:

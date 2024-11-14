@@ -28,25 +28,20 @@ class Store:
     def order(self, shopping_list: List[Tuple[Product, int]]) -> float:
         """
         Places an order for multiple products and returns the total cost.
-
-        Args:
-            shopping_list (List[Tuple[Product, int]]): A list of tuples, each containing
-            a Product instance and the quantity to purchase.
-
-        Returns:
-            float: The total price of the entire order.
         """
         total_price = 0.0
 
         for product, quantity in shopping_list:
-            # Ensure the product is in the store's inventory and active
+            # Check that the product is in the store and is active
             if product not in self.products or not product.is_active():
                 raise ValueError(f"Product '{product.name}' is not available or inactive in the store.")
 
-            # Calculate price with promotion if applicable
+            # Apply promotion if available
             if product.promotion:
                 total_price += product.promotion.apply_promotion(product, quantity)
+                # Reduce the quantity after promotion is applied
+                product.buy(quantity)  # This reduces the stock count after promotional purchase
             else:
-                total_price += product.buy(quantity)
+                total_price += product.buy(quantity)  # This will handle stock reduction for regular purchases
 
         return total_price
