@@ -30,7 +30,22 @@ def list_all_products(store: Store):
     products = store.get_all_products()
     print("------")
     for i, product in enumerate(products, start=1):
-        print(f"{i}. {product.show()}")
+        # Display for NonStockedProduct
+        if isinstance(product, NonStockedProduct):
+            promotion_text = product.promotion.name if product.promotion else "None"
+            print(f"{i}. {product.name}, Price: ${product.price}, Quantity: Unlimited, Promotion: {promotion_text}!")
+
+        # Display for LimitedProduct
+        elif isinstance(product, LimitedProduct):
+            promotion_text = product.promotion.name if product.promotion else "None"
+            print(
+                f"{i}. {product.name}, Price: ${product.price}, Limited to 1 per order!, Promotion: {promotion_text}!")
+
+        # Display for regular Product
+        else:
+            promotion_text = product.promotion.name if product.promotion else "None"
+            print(
+                f"{i}. {product.name}, Price: ${product.price}, Quantity: {product.get_quantity()}, Promotion: {promotion_text}!")
     print("------")
 
 
@@ -66,10 +81,10 @@ def make_order(store: Store):
 
             quantity = int(quantity_input)
 
-
+            # Handle the case where a product is limited
             if isinstance(product, LimitedProduct) and quantity > product.maximum:
                 print(f"Error while making order! Only {product.maximum} is allowed from this product!")
-                return
+                return  # Return to the menu silently after the error.
 
             shopping_list.append((product, quantity))
             print("Product added to list!")

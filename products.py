@@ -106,9 +106,9 @@ class NonStockedProduct(Product):
         raise Exception("Quantity cannot be set for non-stocked products.")
 
     def show(self) -> str:
-        """Returns a string representing non-stocked product details."""
-        # Displaying "Quantity: Unlimited" for non-stocked products
-        return f"{self.name}, Price: ${self.price}, Quantity: Unlimited, Promotion: {self.promotion.name if self.promotion else 'None'}"
+        """Displays information specific to NonStockedProduct."""
+        promotion_text = f"Promotion: {self.promotion.name}!" if self.promotion else "Promotion: None"
+        return f"{self.name}, Price: ${self.price}, Quantity: Unlimited, {promotion_text}"
 
 
     def buy(self, quantity: int) -> float:
@@ -145,8 +145,9 @@ class LimitedProduct(Product):
         return super().buy(quantity)
 
     def show(self) -> str:
-        """Returns a stirng by representing limited product details."""
-        return f"{self.name}, Price: ${self.price}, Quantity: {self.quantity}, Max per order{self.maximum}"
+        """Displays information specific to LimitedProduct."""
+        promotion_text = f"Promotion: {self.promotion.name}!" if self.promotion else "Promotion: None"
+        return f"{self.name}, Price: ${self.price}, Limited to {self.maximum} per order!, {promotion_text}"
 
 
 
