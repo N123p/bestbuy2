@@ -1,6 +1,18 @@
 class Product:
+    """
+    Represents a product in a store with a name, price, and quantity.
+
+    This class includes methods to manage stock, apply promotions, and display product information.
+    """
     def __init__(self, name: str, price: float, quantity: int = 0):
         """Initialize a Product with a name, price, and initial quantity."""
+        if not name.strip():
+            raise ValueError("Product name cannot be empty")
+        if price < 0:
+            raise ValueError("Product price must be non-negative")
+        if quantity < 0:
+            raise ValueError("Product quantity must be non-negative")
+
         self.name = name
         self.price = price
         self.quantity = quantity

@@ -2,50 +2,19 @@ from products import Product, NonStockedProduct, LimitedProduct
 from store import Store
 from promotions import PercentDiscount, SecondHalfPrice, ThirdOneFree
 
-# Setup initial stock of inventory with promotions
-product_list = [
-    Product("MacBook Air M2", price=1450, quantity=100),
-    Product("Bose QuietComfort Earbuds", price=250, quantity=500),
-    Product("Google Pixel 7", price=500, quantity=250),
-    NonStockedProduct("Windows License", price=125),
-    LimitedProduct("Shipping", price=10, quantity=250, maximum=1)
-]
-
-# Create promotion instances
-second_half_price = SecondHalfPrice("Second Half price!")
-third_one_free = ThirdOneFree("Third One Free!")
-thirty_percent_off = PercentDiscount("30% off", percent=30)
-
-# Add promotions to selected products
-product_list[0].set_promotion(second_half_price)  # MacBook Air M2
-product_list[1].set_promotion(third_one_free)  # Bose QuietComfort Earbuds
-product_list[3].set_promotion(thirty_percent_off)  # Windows License
-
-# Create a store with the products
-best_buy = Store(product_list)
-
 
 def list_all_products(store: Store):
     """Displays all products currently available in the store."""
     products = store.get_all_products()
     print("------")
     for i, product in enumerate(products, start=1):
-        # Display for NonStockedProduct
+        promotion_text = product.promotion.name if product.promotion else "None"
         if isinstance(product, NonStockedProduct):
-            promotion_text = product.promotion.name if product.promotion else "None"
             print(f"{i}. {product.name}, Price: ${product.price}, Quantity: Unlimited, Promotion: {promotion_text}!")
-
-        # Display for LimitedProduct
         elif isinstance(product, LimitedProduct):
-            promotion_text = product.promotion.name if product.promotion else "None"
-            print(
-                f"{i}. {product.name}, Price: ${product.price}, Limited to 1 per order!, Promotion: {promotion_text}!")
-
-        # Display for regular Product
+            print(f"{i}. {product.name}, Price: ${product.price}, Limited to {product.maximum} per order!, Promotion: {promotion_text}!")
         else:
-            promotion_text = product.promotion.name if product.promotion else "None"
-            print(
-                f"{i}. {product.name}, Price: ${product.price}, Quantity: {product.get_quantity()}, Promotion: {promotion_text}!")
+            print(f"{i}. {product.name}, Price: ${product.price}, Quantity: {product.get_quantity()}, Promotion: {promotion_text}!")
     print("------")
 
 
@@ -105,12 +74,6 @@ def make_order(store: Store):
         print(f"Unexpected error: {error}")
 
 
-    return
-
-
-
-
-
 def start(store: Store):
     """Starts the user interface to interact with the store."""
     while True:
@@ -137,9 +100,31 @@ def start(store: Store):
             print("Invalid choice. Please enter a number between 1 and 4.")
 
 
-
 def main():
     """Main function to initialize the store and start the user interface."""
+    # Setup initial stock of inventory with promotions
+    product_list = [
+        Product("MacBook Air M2", price=1450, quantity=100),
+        Product("Bose QuietComfort Earbuds", price=250, quantity=500),
+        Product("Google Pixel 7", price=500, quantity=250),
+        NonStockedProduct("Windows License", price=125),
+        LimitedProduct("Shipping", price=10, quantity=250, maximum=1)
+    ]
+
+    # Create promotion instances
+    second_half_price = SecondHalfPrice("Second Half price!")
+    third_one_free = ThirdOneFree("Third One Free!")
+    thirty_percent_off = PercentDiscount("30% off", percent=30)
+
+    # Add promotions to selected products
+    product_list[0].set_promotion(second_half_price)  # MacBook Air M2
+    product_list[1].set_promotion(third_one_free)  # Bose QuietComfort Earbuds
+    product_list[3].set_promotion(thirty_percent_off)  # Windows License
+
+    # Create a store with the products
+    best_buy = Store(product_list)
+
+    # Start the user interface
     start(best_buy)
 
 
